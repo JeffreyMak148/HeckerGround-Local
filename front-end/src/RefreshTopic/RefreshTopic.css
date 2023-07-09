@@ -1,0 +1,11 @@
+.refresh-button {
+    background-color: #2d2d39;
+    border: none;
+    color: #fff;
+    height: 3rem;
+}
+
+.refresh-button:hover {
+    background-color: #43434f;
+    transition: all 0.1s;
+}

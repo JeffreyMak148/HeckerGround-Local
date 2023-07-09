@@ -1,0 +1,103 @@
+.menu-button {
+    height: 3rem;
+    width: 2rem;
+}
+
+.menu-button > a {
+    color: #e8e8e8;
+    display: block;
+    height: inherit;
+}
+
+.menu-button > a:hover {
+    background-color: #43434f;
+    transition: all 0.1s;
+    border-radius: 3px;
+}
+
+.nav-menu {
+    background-color: #2d2d39;
+    width: 0px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: 250ms;
+    z-index: -1;
+    opacity: 0.8;
+}
+
+.nav-menu.active {
+    left: 0;
+    width: 250px;
+    transition: 250ms;
+    z-index: 2;
+    backdrop-filter: blur(10px);
+}
+
+.menu-text {
+    list-style: none;
+    height: 50px;
+    padding-left: 1rem;
+    font-family: "Arvo";
+}
+
+.menu-text a {
+    text-decoration: none;
+    color: #e8e8e8;
+    font-size: 18px;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    display:block;
+    text-align: left;
+    line-height: 55px;
+}
+
+.menu-text a:hover {
+    color: rgb(133, 76, 186);
+}
+
+span {
+    margin-left: 16px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* opacity: 0; */
+    z-index: -1;
+    transition: 250ms;
+}
+
+.overlay.active {
+    /* opacity: 1; */
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    transition: 250ms;
+}
+
+.left-menu {
+    background-color: #141418;
+    flex-grow: 1;
+    padding-top: 1rem;
+}
+
+.right-menu {
+    flex-grow: 2;
+}
+
+.selected-category-color {
+    color: rgb(133, 76, 186);
+}
+
+.user-icon {
+    background-color: #141418;
+    border: 0 solid transparent;
+    color: #e8e8e8;
+}

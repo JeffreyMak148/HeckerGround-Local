@@ -1,0 +1,99 @@
+.create-new-post-container {
+    position: fixed;
+    right: 9vw;
+    bottom: 0;
+    height: 30rem;
+    max-height: 100vh;
+    width: 25rem;
+    border: 1px solid transparent;
+    text-align: left;
+    padding: 0.8rem;
+    border-radius: 4px;
+    background-color: #272731;
+    padding-bottom: 2px;
+    z-index: 2;
+}
+
+.form-text-color {
+    color: #e8e8e8;
+}
+
+.create-topic-input {
+    color: #e8e8e8;
+    background-color:rgb(21, 21, 21);
+    width:100%;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    border:1px solid transparent;
+    padding: 0px 8px 0px;
+}
+
+.create-topic-input:focus {
+    outline: none;
+}
+
+.create-category-dropdown {
+    background-color:rgb(21, 21, 21);
+    color: #e8e8e8;
+    border: none;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.create-category-dropdown:focus {
+    outline: none;
+}
+
+.create-content-input {
+    color: #e8e8e8;
+    background-color:rgb(20, 20, 20);
+    width:100%;
+    height:78%;
+    border-radius: 6px;
+    border:1px solid transparent;
+    padding: 0px 8px 0px;
+    resize: none;
+}
+
+.create-content-input:focus {
+    outline: none;
+}
+
+.create-button-div {
+    width: 100%;
+}
+
+.create-post-button {
+    background-color: #272731;
+    border: 1px solid transparent;
+    color: #e8e8e8;
+    position: absolute;
+    right: 0.8rem;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.create-post-button:hover {
+    background-color: #43434f;
+    transition: all 0.4s;
+}
+
+.close-button:hover {
+    background-color: #bfbfdc;
+    transition: all 0.1s;
+}
+
+.add-button {
+    background-color: #2d2d39;
+    border: none;
+    color: #fff;
+    height: 3rem;
+}
+
+.add-button:hover {
+    background-color: #43434f;
+    transition: all 0.1s;
+}
