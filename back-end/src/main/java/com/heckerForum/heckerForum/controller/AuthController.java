@@ -8,7 +8,6 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.heckerForum.heckerForum.dto.LoginRequest;
 import com.heckerForum.heckerForum.dto.RegisterRequest;
 import com.heckerForum.heckerForum.dto.UserInfoResponse;
+import com.heckerForum.heckerForum.exception.loginInvalidException;
+import com.heckerForum.heckerForum.exception.registerInvalidException;
 import com.heckerForum.heckerForum.models.User;
 import com.heckerForum.heckerForum.repository.UserRepository;
 import com.heckerForum.heckerForum.util.JwtUtil;
@@ -55,7 +56,7 @@ public class AuthController extends BaseController {
 	}
 	
 	@PostMapping("/signin")
-	public ResponseEntity<?> signIn(@Valid @RequestBody LoginRequest req) {
+	public ResponseEntity<?> signIn(@Valid @RequestBody LoginRequest req) throws Exception {
 		try {
 			Authentication authentication = authenticationManager
 					.authenticate(new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
@@ -80,19 +81,18 @@ public class AuthController extends BaseController {
 											   user.getEmail(),
 											   roles));
 		} catch(BadCredentialsException e) {
-			log.debug(e.getMessage());
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+			throw new loginInvalidException("Invalid login attempt");
 		}
 	}
 	
 	@PostMapping("/signup")
-	  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest req) {
+	  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest req) throws Exception {
 	    if (userRepository.existsByUsername(req.getUsername())) {
-	      return ResponseEntity.badRequest().body("Error: Username is already taken!");
+	    	throw new registerInvalidException("Username is already taken");
 	    }
 
 	    if (userRepository.existsByEmail(req.getEmail())) {
-	      return ResponseEntity.badRequest().body("Error: Email is already in use!");
+	    	throw new registerInvalidException("Email is already in use");
 	    }
 
 	    // Create new user's account

@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Col, Container, Modal, Row } from 'react-bootstrap';
 import { FaUserCircle } from "react-icons/fa";
 import { useUser } from '../Context/UserProvider';
+import { useModal } from '../Context/ModalProvider';
 import "./Login.css";
 
 const Login = () => {
+    const modal = useModal();
     const user = useUser();
     const [show, setShow] = useState(false);
     const [loginEmail, setLoginEmail] = useState("");
@@ -38,14 +40,18 @@ const Login = () => {
                 user.setIsLoggedIn(true);
                 return Promise.all([response.json(), response.headers]);
             } else {
-                return Promise.reject("Invalid login attempt");
+                return response.json().then(data => Promise.reject({
+                    status: response.status,
+                    data
+                }))
             }
         })
         .then(([body, headers]) => {
             window.location.href = "";
         })
-        .catch((message) => {
-            alert(message);
+        .catch((error) => {
+            console.log(error);
+            modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length, error}]));
         });
     }
 
@@ -76,7 +82,10 @@ const Login = () => {
             if(response.status === 200) {
                 return Promise.all([response.json(), response.headers]);
             } else {
-                return Promise.reject("Invalid register attempt");
+                return response.json().then(data => Promise.reject({
+                    status: response.status,
+                    data
+                }))
             }
         })
         .then(([body, headers]) => {
@@ -92,19 +101,22 @@ const Login = () => {
                     user.setIsLoggedIn(true);
                     return Promise.all([response.json(), response.headers]);
                 } else {
-                    return Promise.reject("Invalid login attempt");
+                    return response.json().then(data => Promise.reject({
+                        status: response.status,
+                        data
+                    }))
                 }
             })
             .then(([body, headers]) => {
                 window.location.href = "";
             })
-            .catch((message) => {
-                alert(message);
+            .catch((error) => {
+                modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length, error}]));
             });
             // window.location.href = "";
         })
-        .catch((message) => {
-            alert(message);
+        .catch((error) => {
+            modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length, error}]));
         });
     }
 

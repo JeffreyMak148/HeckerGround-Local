@@ -7,5 +7,5 @@
     position: fixed;
     right: 25vw;
     width: 0;
-    z-index: 9;
+    z-index: 9999;
 }
