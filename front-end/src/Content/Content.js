@@ -13,9 +13,14 @@ import formatDate from '../util/formatDate';
 import "./Content.css";
 import filterUniqueValues from '../util/filterUniqueValues';
 import ErrorDisplay from '../ErrorDisplay';
+import Footer from '../Footer/Footer';
+import Privacy from '../Privacy/Privacy';
+import Terms from '../Terms/Terms';
 
 const Content = ({notFound}) => {
 
+    const [terms, setTerms] = useState(false);
+    const [privacy, setPrivacy] = useState(false);
     const [comments, setComments] = useState(null);
     const [pageNum, setPageNum] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -28,10 +33,24 @@ const Content = ({notFound}) => {
     
     useEffect(() => {
         const postId = location.pathname.split("/posts/")[1];
+        const termsLocation = location.pathname === "/terms-and-conditions";
+        const privacyLocation = location.pathname === "/privacy-policy";
         if(!!postId && postId !== content.postId) {
             content.setPostId(postId);
             setHasMore(true);
             setPageNum(1);
+        }
+
+        if(!!termsLocation) {
+            setTerms(true);
+        } else {
+            setTerms(false);
+        }
+
+        if(!!privacyLocation) {
+            setPrivacy(true);
+        } else {
+            setPrivacy(false);
         }
     }, [location]);
 
@@ -142,107 +161,115 @@ const Content = ({notFound}) => {
     return (
         <>
             <div className="content-overflow">
-                <ul>
-                    {
-                    comments ? comments.map((data, index) => {
-                            if(comments.length === index + 1) {
-                                return <div ref={lastDataRef} key={data.id} className="content-div">
-                                    <li>
-                                        <div className="content-info flex-display">
-                                            <div className="content-number-div">
-                                                #{data.commentNumber}
+                {
+                    terms || privacy ?
+                         terms ? <Terms/> : <Privacy/>
+                    :
+                        <>
+                            <ul>
+                                {
+                                comments ? comments.map((data, index) => {
+                                        if(comments.length === index + 1) {
+                                            return <div ref={lastDataRef} key={data.id} className="content-div">
+                                                <li>
+                                                    <div className="content-info flex-display">
+                                                        <div className="content-number-div">
+                                                            #{data.commentNumber}
+                                                        </div>
+                                                        <div className="content-username-div" onClick={() => showProfileModal(data.user.id)}>
+                                                            {data.user.username}
+                                                        </div>
+                                                        <div className="content-date-div">
+                                                            {formatDate(data.createDateTime)}
+                                                        </div>
+                                                        <div className="content-reply-div">
+                                                            <CreateComment reply={data}/>
+                                                        </div>
+                                                    </div>
+                                                    <ReplyComment replyComment={data.replyComment} showCount={3}/>
+                                                    <div className="content-comment-div">
+                                                        {data.content}
+                                                    </div>
+                                                    {
+                                                        data.numberOfReply > 0
+                                                        ?
+                                                        <div className="content-comment-count">
+                                                            <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                        </div>
+                                                        :
+                                                        <></>
+                                                    }
+                                                </li>
+                                            </div>;
+                                        } else {
+                                            return <div key={data.id}>
+                                                <div className="content-div">
+                                                    <li>
+                                                        <div className="content-info flex-display">
+                                                            <div className="content-number-div">
+                                                                #{data.commentNumber}
+                                                            </div>
+                                                            <div className="content-username-div" onClick={() => showProfileModal(data.user.id)}>
+                                                                {data.user.username}
+                                                            </div>
+                                                            <div className="content-date-div">
+                                                                {formatDate(data.createDateTime)}
+                                                            </div>
+                                                            <div className="content-reply-div">
+                                                                <CreateComment reply={data} />
+                                                            </div>
+                                                        </div>
+                                                        <ReplyComment replyComment={data.replyComment} showCount={3}/>
+                                                        <div className="content-comment-div">
+                                                            {data.content}
+                                                        </div>
+                                                        {
+                                                            data.numberOfReply > 0
+                                                            ?
+                                                            <div className="content-comment-count">
+                                                                <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                            </div>
+                                                            :
+                                                            <></>
+                                                        }
+                                                    </li>
+                                                </div>
+                                                {/* {
+                                                    data.commentNumber % 50 === 0 ?
+                                                        <div>{data.commentNumber}</div>
+                                                    :
+                                                        <></>
+                                                } */}
                                             </div>
-                                            <div className="content-username-div" onClick={() => showProfileModal(data.user.id)}>
-                                                {data.user.username}
-                                            </div>
-                                            <div className="content-date-div">
-                                                {formatDate(data.createDateTime)}
-                                            </div>
-                                            <div className="content-reply-div">
-                                                <CreateComment reply={data}/>
-                                            </div>
-                                        </div>
-                                        <ReplyComment replyComment={data.replyComment} showCount={3}/>
-                                        <div className="content-comment-div">
-                                            {data.content}
-                                        </div>
-                                        {
-                                            data.numberOfReply > 0
-                                            ?
-                                            <div className="content-comment-count">
-                                                <CommentCount count={data.numberOfReply} commentId={data.id}/>
-                                            </div>
-                                            :
-                                            <></>
                                         }
-                                    </li>
-                                </div>;
-                            } else {
-                                return <div key={data.id}>
-                                    <div className="content-div">
-                                        <li>
-                                            <div className="content-info flex-display">
-                                                <div className="content-number-div">
-                                                    #{data.commentNumber}
-                                                </div>
-                                                <div className="content-username-div" onClick={() => showProfileModal(data.user.id)}>
-                                                    {data.user.username}
-                                                </div>
-                                                <div className="content-date-div">
-                                                    {formatDate(data.createDateTime)}
-                                                </div>
-                                                <div className="content-reply-div">
-                                                    <CreateComment reply={data} />
-                                                </div>
-                                            </div>
-                                            <ReplyComment replyComment={data.replyComment} showCount={3}/>
-                                            <div className="content-comment-div">
-                                                {data.content}
-                                            </div>
-                                            {
-                                                data.numberOfReply > 0
-                                                ?
-                                                <div className="content-comment-count">
-                                                    <CommentCount count={data.numberOfReply} commentId={data.id}/>
-                                                </div>
-                                                :
-                                                <></>
-                                            }
-                                        </li>
-                                    </div>
-                                    {/* {
-                                        data.commentNumber % 50 === 0 ?
-                                            <div>{data.commentNumber}</div>
-                                        :
-                                            <></>
-                                    } */}
-                                </div>
+                                    })
+                                : <></>
+                                }
+                            </ul>
+                            { !!comments ? 
+                                    <div className="refresh-comment-div"  onClick={() => refreshContent()}><div className="refresh-comment">Refresh Comment</div></div>
+                                :
+                                    <></>
                             }
-                        })
-                    : <></>
+                            {
+                                error ?
+                                    <div className="post-not-available-div">
+                                        Post is not available
+                                    </div>
+                                :
+                                    <></>
+                            }
+                            {
+                                notFound ?
+                                    <div className="not-found-div">
+                                        Page Not Found
+                                    </div>
+                                :
+                                    <></>
+                            }
+                        </>
                     }
-                </ul>
-                { !!comments ? 
-                        <div className="refresh-comment-div"  onClick={() => refreshContent()}><div className="refresh-comment">Refresh Comment</div></div>
-                    :
-                        <></>
-                }
-                {
-                    error ?
-                        <div className="post-not-available-div">
-                            Post is not available
-                        </div>
-                    :
-                        <></>
-                }
-                {
-                    notFound ?
-                        <div className="not-found-div">
-                            Page Not Found
-                        </div>
-                    :
-                        <></>
-                }
+                <Footer/>
             </div>
             <ErrorDisplay/>
             <CommentModal/>

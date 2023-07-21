@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Main from './Main';
 import { UserProvider } from './Context/UserProvider';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Topic from './Topic';
 import { ContentProvider } from './Context/ContentProvider';
 import { TopicProvider } from './Context/TopicProvider';
 import { ModalProvider } from './Context/ModalProvider';
@@ -40,6 +39,8 @@ function App() {
                   <Route path="/category/:catId" element={ <Main/> } />
                   <Route path="/posts/:postId" element={ <Main/> } />
                   <Route path="/profile/:profileId" element={ <Main/> } />
+                  <Route path="/terms-and-conditions" element={ <Main/> } />
+                  <Route path="/privacy-policy" element={ <Main/> } />
                   <Route path="*" element={ <Main notFound={true}/> } />
                 </Routes>
               </ModalProvider>

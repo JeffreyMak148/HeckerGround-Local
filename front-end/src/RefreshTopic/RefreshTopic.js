@@ -1,11 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { CloseButton } from 'react-bootstrap';
-import fetchUtil from '../util/fetchUtil';
-import { BsPlusLg } from "react-icons/bs";
+import React from 'react';
 import "./RefreshTopic.css";
-import { useUser } from '../Context/UserProvider';
-import { Link } from 'react-router-dom';
-import { useModal } from '../Context/ModalProvider';
 import { MdRefresh } from "react-icons/md";
 import { useTopic } from '../Context/TopicProvider';
 

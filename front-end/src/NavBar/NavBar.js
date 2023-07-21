@@ -15,11 +15,14 @@ const NavBar = () => {
     const topic = useTopic();
     const modal = useModal();
     const [title, setTitle] = useState("Chatting");
+    const [contentTitle, setContentTitle] = useState("");
     const location = useLocation();
 
     useEffect(() => {
         const catId = location.pathname.split("/category/")[1];
         const profileId = location.pathname.split("/profile")[1];
+        const termsLocation = location.pathname === "/terms-and-conditions";
+        const privacyLocation = location.pathname === "/privacy-policy";
         if(!!catId && !!topic.category) {
             let currentCat = topic.category.find(c => c.catId === parseInt(catId));
             if(!!currentCat) {
@@ -39,7 +42,16 @@ const NavBar = () => {
         if(!!profileId && !!topic.profileUser) {
             setTitle(topic.profileUser.username);
         }
-    }, [location, topic.category, topic.profileUser]);
+        if(!!termsLocation || !!privacyLocation) {
+            setContentTitle(termsLocation ? "Terms and Conditions" : "Privacy Policy");
+        } else {
+            if(content.post) {
+                setContentTitle(content.post.title);
+            } else {
+                setContentTitle("");
+            }
+        }
+    }, [location, topic.category, topic.profileUser, content.post]);
 
     useEffect(() => {
         const postCatId = !!content.post ? content.post.catId : null;
@@ -48,7 +60,7 @@ const NavBar = () => {
             if(currentCat.category !== title);
             setTitle(currentCat.category);
         }
-    }, [content.post])
+    }, [content.post]);
 
     return (
         <Container className="nav-bar">
@@ -86,18 +98,9 @@ const NavBar = () => {
                 <Col className="nav-bar-color padding-right-0">
                     <div className="flex-display height-100">
                         <div className="flex-1 height-100">
-                            {
-                                content.post ? 
-                                (
-                                    <h1 className="post-title">
-                                        {content.post.title}
-                                    </h1>
-                                )
-                                :
-                                (
-                                    <></>                                    
-                                )
-                            }
+                            <h1 className="post-title">
+                                {contentTitle}
+                            </h1>
                         </div>
                         <div>
                             {
