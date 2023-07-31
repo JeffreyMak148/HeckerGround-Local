@@ -24,9 +24,9 @@ const ErrorModal = ({position, id}) => {
     useEffect(() => {
         if(isClosing) {{
             const timeoutId = setTimeout(function() {
-                let newErrors = [...modal.errorModal];
-                newErrors = newErrors.filter(e => e.errorId !== id);
-                modal.setErrorModal(newErrors);
+                modal.setErrorModal(currentErrors => {
+                        return currentErrors.filter(e => e.errorId !== id);
+                })
             }, 300);
     
             return () => {
