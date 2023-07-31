@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.heckerForum.heckerForum.dto.CommentDto;
+import com.heckerForum.heckerForum.exception.CommentNotFoundException;
 import com.heckerForum.heckerForum.exception.PostNotFoundException;
 import com.heckerForum.heckerForum.models.Comment;
 import com.heckerForum.heckerForum.models.Post;
@@ -51,6 +52,18 @@ public class CommentService {
 		comment.setCommentNumber(allComments.size() + 1);
 		comment.setNumberOfReply(0);
 		
+		return commentRepository.save(comment);
+	}
+	
+	public Comment saveUpvote(Long commentId) throws Exception {
+		Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CommentNotFoundException("Comment does not exist"));
+		comment.setUpvote(comment.getUpvote()+1);
+		return commentRepository.save(comment);
+	}
+	
+	public Comment saveDownvote(Long commentId) throws Exception {
+		Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new CommentNotFoundException("Comment does not exist"));
+		comment.setDownvote(comment.getDownvote()+1);
 		return commentRepository.save(comment);
 	}
 	

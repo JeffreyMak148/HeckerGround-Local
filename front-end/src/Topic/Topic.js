@@ -18,59 +18,58 @@ const Topic = () => {
     const content = useContent();
     const modal = useModal();
     const loadingBar = useLoading();
+    const pageSize = 10;
 
     const [datas, setDatas] = useState([]);
-    const [pageNum, setPageNum] = useState(1);
+    const [pageNum, setPageNum] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const catId = location.pathname.split("/category/")[1];
-        const profileId = location.pathname.split("/profile/")[1];
-        const postId = location.pathname.split("/posts/")[1];
+        const catId = parseInt(location.pathname.split("/category/")[1]);
+        const profileId = parseInt(location.pathname.split("/profile/")[1]);
+        const postId = parseInt(location.pathname.split("/posts/")[1]);
         
         if(!!postId) {
-            const postCatId = !!content.post && parseInt(postId) === content.post.id ? content.post.catId : null;
+            const postCatId = !!content.post && postId === content.post.id ? content.post.catId : null;
             if(!topic.profileId && !!postCatId && postCatId !== topic.selectedCatId) {
                 setDatas([]);
                 setHasMore(true);
-                setPageNum(1);
-                topic.setSelectedCatId(parseInt(postCatId));
+                setPageNum(0);
+                topic.setSelectedCatId(postCatId);
             }
         }
 
-        if(!!catId && parseInt(catId) !== topic.selectedCatId) {
+        if(!!catId && catId !== topic.selectedCatId) {
             setDatas([]);
             setHasMore(true);
-            setPageNum(1);
+            setPageNum(0);
             topic.setProfileId(null);
             topic.setProfileUser(null);
-            topic.setSelectedCatId(parseInt(catId));
+            topic.setSelectedCatId(catId);
         }
 
-        if(!!profileId && parseInt(profileId) !== topic.profileId) {
+        if(!!profileId && profileId !== topic.profileId) {
             setDatas([]);
             setHasMore(true);
-            setPageNum(1);
+            setPageNum(0);
             topic.setSelectedCatId(null);
-            topic.setProfileId(parseInt(profileId));
+            topic.setProfileId(profileId);
         }
 
     }, [location, content.post]);
 
-    useEffect(() => {
+    function fetchTopicsByPostIdAndPagination(catIdOption, pageNumOption, pageSizeOption) {
         if(!!topic.selectedCatId && !loadingBar.topicLoading) {
-            setLoading(true);
             loadingBar.setTopicLoading(true);
-            fetchUtil(`/api/posts/category/${topic.selectedCatId}?page=0&size=10`, null, "GET")
+            fetchUtil(`/api/posts/category/${catIdOption}?page=${pageNumOption}&size=${pageSizeOption}`, null, "GET")
             .then(({status, data}) => {
-                if(data.length === 0) {
+                if(data.length < pageSizeOption) {
                     setHasMore(false);
                 }
-                setDatas(data);
-                setLoading(false);
+                setDatas(currentTopics => ([...currentTopics, ...data]));
             })
             .then(() => {
+                setPageNum(currentPageNum => (currentPageNum + 1));
                 loadingBar.setTopicLoading(false);
             })
             .catch(error => {
@@ -78,20 +77,21 @@ const Topic = () => {
                 loadingBar.setTopicLoading(false);
             });
         }
+    }
 
+    function fetchProfileByProfileIdAndPagination(profileIdOption, pageNumOption, pageSizeOption) {
         if(!!topic.profileId && !loadingBar.topicLoading) {
-            setLoading(true);
             loadingBar.setTopicLoading(true);
-            fetchUtil(`/api/profile/${topic.profileId}?page=0&size=10`, null, "GET")
+            fetchUtil(`/api/profile/${profileIdOption}?page=${pageNumOption}&size=${pageSizeOption}`, null, "GET")
             .then(({status, data}) => {
-                if(data.posts.length === 0) {
+                if(data.posts.length < pageSizeOption) {
                     setHasMore(false);
                 }
                 topic.setProfileUser(data.user);
-                setDatas(data.posts);
-                setLoading(false);
+                setDatas(currentTopics => ([...currentTopics, ...data.posts]));
             })
             .then(() => {
+                setPageNum(currentPageNum => (currentPageNum + 1));
                 loadingBar.setTopicLoading(false);
             })
             .catch(error => {
@@ -99,118 +99,53 @@ const Topic = () => {
                 loadingBar.setTopicLoading(false);
             });
         }
+    }
 
-    }, [topic.selectedCatId, topic.profileId]);
+    useEffect(() => {
+        setDatas([]);
+        setHasMore(true);
+        setPageNum(0);
+        fetchTopicsByPostIdAndPagination(topic.selectedCatId, 0, pageSize);
+    }, [topic.selectedCatId]);
+
+    useEffect(() => {
+        setDatas([]);
+        setHasMore(true);
+        setPageNum(0);
+        fetchProfileByProfileIdAndPagination(topic.profileId, 0, pageSize);
+    }, [topic.profileId]);
 
     useEffect(() => {
         if(topic.refresh) {
+            setHasMore(true);
+            setPageNum(0);
+            setDatas([]);
             if(!!topic.selectedCatId && !loadingBar.topicLoading) {
-                setLoading(true);
-                loadingBar.setTopicLoading(true);
-                fetchUtil(`/api/posts/category/${topic.selectedCatId}?page=0&size=10`, null, "GET")
-                .then(({status, data}) => {
-                    if(data.length === 0) {
-                        setHasMore(false);
-                    }
-                    setDatas(data);
-                    setLoading(false);
-                })
-                .then(() => {
-                    loadingBar.setTopicLoading(false);
-                })
-                .catch(error => {
-                    modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length,  error}]));
-                    loadingBar.setTopicLoading(false);
-                });
+                fetchTopicsByPostIdAndPagination(topic.selectedCatId, 0, pageSize);
             }
     
             if(!!topic.profileId && !loadingBar.topicLoading) {
-                setLoading(true);
-                loadingBar.setTopicLoading(true);
-                fetchUtil(`/api/profile/${topic.profileId}?page=0&size=10`, null, "GET")
-                .then(({status, data}) => {
-                    if(data.posts.length === 0) {
-                        setHasMore(false);
-                    }
-                    topic.setProfileUser(data.user);
-                    setDatas(data.posts);
-                    setLoading(false);
-                })
-                .then(() => {
-                    loadingBar.setTopicLoading(false);
-                })
-                .catch(error => {
-                    modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length,  error}]));
-                    loadingBar.setTopicLoading(false);
-                });
+                fetchProfileByProfileIdAndPagination(topic.profileId, 0, pageSize);
             }
-
-            setHasMore(true);
-            setPageNum(1);
             topic.setRefresh(false);
             scrollToTop();
         }
 
     }, [topic.refresh]);
-    
-    function fetchPostsByCategoryAndPagination() {
-        if(!!topic.selectedCatId && !loadingBar.topicLoading) {
-            loadingBar.setTopicLoading(true);
-            setLoading(true);
-            fetchUtil(`/api/posts/category/${topic.selectedCatId}?page=${pageNum}&size=10`, null, "GET")
-            .then(({status, data}) => {
-                if(data.length === 0) {
-                    setHasMore(false);
-                }
-                setDatas([...datas, ...data]);
-                setLoading(false);
-            })
-            .then(() => {
-                loadingBar.setTopicLoading(false);
-            })
-            .catch(error => {
-                modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length,  error}]));
-                loadingBar.setTopicLoading(false);
-            });
-        }
-    }
-
-    function fetchPostsByProfileIdAndPagination() {
-        if(!!topic.profileId && !loadingBar.topicLoading) {
-            loadingBar.setTopicLoading(true);
-            setLoading(true);
-            fetchUtil(`/api/profile/${topic.profileId}?page=${pageNum}&size=10`, null, "GET")
-            .then(({status, data}) => {
-                if(data.posts.length === 0) {
-                    setHasMore(false);
-                }
-                setDatas([...datas, ...data.posts]);
-                setLoading(false);
-            })
-            .then(() => {
-                loadingBar.setTopicLoading(false);
-            })
-            .catch(error => {
-                modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length,  error}]));
-                loadingBar.setTopicLoading(false);
-            });
-        }
-    }
 
     const observer = useRef();
     const lastDataRef = useCallback(node => {
-        if(loading) return;
+        if(loadingBar.topicLoading) return;
         if(observer.current) observer.current.disconnect();
         observer.current = new IntersectionObserver(entries => {
             if(entries[0].isIntersecting && hasMore) {
-                setPageNum((pageNum) => pageNum + 1);
-                if(!!topic.selectedCatId) fetchPostsByCategoryAndPagination();
-                if(!!topic.profileId) fetchPostsByProfileIdAndPagination();
+                if(!!topic.selectedCatId) fetchTopicsByPostIdAndPagination(topic.selectedCatId, pageNum, pageSize);
+                if(!!topic.profileId) fetchProfileByProfileIdAndPagination(topic.profileId, pageNum, pageSize);
             }
         });
 
         if(node) observer.current.observe(node);
-    }, [loading, hasMore]);
+    }, [loadingBar.topicLoading, hasMore]);
 
     const topicRef = useRef();
     const scrollToTop = () => {
@@ -235,7 +170,7 @@ const Topic = () => {
                         if(datas.length === index + 1) {
                             return <div ref={lastDataRef} key={data.id} className="post-topic-div">
                                 <li>
-                                    <Link to={`/posts/${data.id}`} className={`post-topic-link${parseInt(content.postId) === data.id ? ' selected-post-color' : ''}`} onClick={() => {if(!loadingBar.contentLoading) setPost(data.id)}}>
+                                    <Link to={`/posts/${data.id}`} className={`post-topic-link${content.postId === data.id ? ' selected-post-color' : ''}`} onClick={() => {if(!loadingBar.contentLoading) setPost(data.id)}}>
                                         <div className="post-topic-top-half">
                                             <span className="username-color">{data.user.username}</span> <span className="date-color">{formatDate(data.createDateTime)}</span>
                                         </div>
@@ -248,7 +183,7 @@ const Topic = () => {
                         } else {
                             return <div key={data.id} className="post-topic-div">
                                 <li>
-                                    <Link to={`/posts/${data.id}`} className={`post-topic-link${parseInt(content.postId) === data.id ? ' selected-post-color' : ''}`} onClick={() => {if(!loadingBar.contentLoading) setPost(data.id)}}>
+                                    <Link to={`/posts/${data.id}`} className={`post-topic-link${content.postId === data.id ? ' selected-post-color' : ''}`} onClick={() => {if(!loadingBar.contentLoading) setPost(data.id)}}>
                                         <div className="post-topic-top-half">
                                             <span className="username-color">{data.user.username}</span> <span className="date-color">{formatDate(data.createDateTime)}</span>
                                         </div>

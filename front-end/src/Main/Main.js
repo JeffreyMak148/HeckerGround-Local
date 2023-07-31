@@ -5,7 +5,7 @@ import { useModal } from '../Context/ModalProvider';
 import { useUser } from '../Context/UserProvider';
 import LoadingBar from '../LoadingBar';
 import NavBar from '../NavBar';
-import Topic from '../Topic';
+import Topic from '../Topic/Topic';
 import fetchUtil from '../util/fetchUtil';
 import "./Main.css";
 

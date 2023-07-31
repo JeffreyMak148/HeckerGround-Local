@@ -33,6 +33,7 @@
     margin-top: 10px;
     align-self: end;
     margin-bottom: 6px;
+    white-space: "pre-wrap";
 }
 
 .create-comment-input:focus {

@@ -21,7 +21,7 @@ const CommentCount = ({count, commentId}) => {
                 :
                 <>
                     <div>
-                        <button className="comment-count-button" onClick={changeCommentId}><FaCommentDots/><div className="comment-count-number">{count}</div></button>
+                        <button className="comment-count-button" onClick={changeCommentId}><FaCommentDots size="0.8em" /><div className="comment-count-number">{count}</div></button>
                     </div>
                 </>
             }

@@ -15,11 +15,8 @@
     transition: all 0.2s;
 }
 
-.comment-count-button > svg {
-    padding-bottom: 2px;
-}
-
 .comment-count-number {
     padding-left: 4px;
     display: inline;
+    font-size: 0.8em;
 }

@@ -42,4 +42,14 @@ public class CommentController extends BaseController {
 		return ResponseEntity.ok(commentDto);
 	}
 	
+	@PostMapping("/upvote/{commentId}")
+	public ResponseEntity<?> upvoteCommentById(@PathVariable Long commentId) throws Exception {
+		return ResponseEntity.ok(commentService.saveUpvote(commentId));
+	}
+	
+	@PostMapping("/downvote/{commentId}")
+	public ResponseEntity<?> downvoteCommentById(@PathVariable Long commentId) throws Exception {
+		return ResponseEntity.ok(commentService.saveDownvote(commentId));
+	}
+	
 }

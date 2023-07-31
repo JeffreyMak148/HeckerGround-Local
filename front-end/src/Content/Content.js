@@ -16,29 +16,31 @@ import ErrorDisplay from '../ErrorDisplay';
 import Footer from '../Footer/Footer';
 import Privacy from '../Privacy/Privacy';
 import Terms from '../Terms/Terms';
+import Vote from '../Vote/Vote';
 
 const Content = ({notFound}) => {
 
     const [terms, setTerms] = useState(false);
     const [privacy, setPrivacy] = useState(false);
-    const [comments, setComments] = useState(null);
-    const [pageNum, setPageNum] = useState(1);
+    const [comments, setComments] = useState([]);
+    const [pageNum, setPageNum] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const location = useLocation();
     const content = useContent();
     const modal = useModal();
     const loadingBar = useLoading();
+    const pageSize = 50;
     
     useEffect(() => {
-        const postId = location.pathname.split("/posts/")[1];
+        const postId = parseInt(location.pathname.split("/posts/")[1]);
         const termsLocation = location.pathname === "/terms-and-conditions";
         const privacyLocation = location.pathname === "/privacy-policy";
         if(!!postId && postId !== content.postId) {
             content.setPostId(postId);
             setHasMore(true);
-            setPageNum(1);
+            setPageNum(0);
+            setComments([]);
         }
 
         if(!!termsLocation) {
@@ -56,49 +58,29 @@ const Content = ({notFound}) => {
 
     useEffect(() => {
         setError(false);
-        initialFetchCommentsByPostIdAndPagination();
+        setComments([]);
+        setHasMore(true);
+        setPageNum(0);
+        fetchCommentsByPostIdAndPagination(content.postId, 0, pageSize);
     }, [content.postId]);
 
-    function initialFetchCommentsByPostIdAndPagination() {
-        if(!!content.postId && !loadingBar.contentLoading) {
+    function fetchCommentsByPostIdAndPagination(postIdOption, pageNumOption, pageSizeOption) {
+        if(!!postIdOption && !loadingBar.contentLoading) {
             loadingBar.setContentLoading(true);
-            setLoading(true);
-            fetchUtil(`/api/posts/${content.postId}?page=0&size=50`, null, "GET")
+            fetchUtil(`/api/posts/${postIdOption}?page=${pageNumOption}&size=${pageSizeOption}`, null, "GET")
             .then(({status, data}) => {
                 if(!data.comments && !data.post) {
                     setError(true);
                 }
-                if(!!data.comments && data.comments.length < 50) {
+                if(!!data.comments && data.comments.length < pageSizeOption) {
                     setHasMore(false);
-                    setLoading(false);
                 }
                 content.setPost(data.post);
-                setComments(data.comments);
-                setLoading(false);
+                setComments(currentComments => ([...currentComments, ...data.comments]));
+                console.log(comments);
             })
             .then(() => {
-                loadingBar.setContentLoading(false);
-            })
-            .catch(error => {
-                modal.setErrorModal(errorModal => ([...errorModal, {errorId: errorModal.length,  error}]));
-                loadingBar.setContentLoading(false);
-            });
-        }
-    }
-
-    function fetchCommentsByPostIdAndPagination() {
-        if(!!content.postId && !loadingBar.contentLoading) {
-            loadingBar.setContentLoading(true);
-            setLoading(true);
-            fetchUtil(`/api/posts/${content.postId}?page=${pageNum}&size=50`, null, "GET")
-            .then(({status, data}) => {
-                if(data.comments.length < 50) {
-                    setHasMore(false);
-                    setLoading(false);
-                }
-                setComments([...comments, ...data.comments]);
-                setLoading(false);
-            }).then(() => {
+                setPageNum(currentPageNum => (currentPageNum + 1));
                 loadingBar.setContentLoading(false);
             })
             .catch(error => {
@@ -110,17 +92,16 @@ const Content = ({notFound}) => {
 
     const observer = useRef();
     const lastDataRef = useCallback(node => {
-        if(loading) return;
+        if(loadingBar.contentLoading) return;
         if(observer.current) observer.current.disconnect();
         observer.current = new IntersectionObserver(entries => {
-            if(entries[0].isIntersecting && hasMore && comments.length >= 50) {
-                setPageNum((pageNum) => pageNum + 1);
-                fetchCommentsByPostIdAndPagination();
+            if(entries[0].isIntersecting && hasMore && comments.length >= pageSize) {
+                fetchCommentsByPostIdAndPagination(content.postId, pageNum, pageSize);
             }
         });
 
         if(node) observer.current.observe(node);
-    }, [loading, hasMore]);
+    }, [loadingBar.contentLoading, hasMore]);
 
     function showProfileModal(profileId) {
         if(!!profileId) {
@@ -131,15 +112,12 @@ const Content = ({notFound}) => {
     function refreshCommentsByPostIdAndPagination(refreshPageNum) {
         if(!!content.postId && !loadingBar.contentLoading) {
             loadingBar.setContentLoading(true);
-            setLoading(true);
             fetchUtil(`/api/posts/${content.postId}?page=${refreshPageNum}&size=50`, null, "GET")
             .then(({status, data}) => {
                 if(data.comments.length < 50) {
                     setHasMore(false);
-                    setLoading(false);
                 }
                 setComments([...comments, ...filterUniqueValues(comments, data.comments)]);
-                setLoading(false);
             }).then(() => {
                 loadingBar.setContentLoading(false);
             })
@@ -190,15 +168,20 @@ const Content = ({notFound}) => {
                                                     <div className="content-comment-div">
                                                         {data.content}
                                                     </div>
-                                                    {
-                                                        data.numberOfReply > 0
-                                                        ?
-                                                        <div className="content-comment-count">
-                                                            <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                    <div className="flex-display">
+                                                        <div className="content-vote-div">
+                                                            <Vote upvoteCount={data.upvote} downvoteCount={data.downvote} />
                                                         </div>
-                                                        :
-                                                        <></>
-                                                    }
+                                                        {
+                                                            data.numberOfReply > 0
+                                                            ?
+                                                            <div className="content-comment-count">
+                                                                <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                            </div>
+                                                            :
+                                                            <></>
+                                                        }
+                                                    </div>
                                                 </li>
                                             </div>;
                                         } else {
@@ -223,15 +206,20 @@ const Content = ({notFound}) => {
                                                         <div className="content-comment-div">
                                                             {data.content}
                                                         </div>
-                                                        {
-                                                            data.numberOfReply > 0
-                                                            ?
-                                                            <div className="content-comment-count">
-                                                                <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                        <div className="flex-display">
+                                                            <div className="content-vote-div">
+                                                                <Vote upvoteCount={data.upvote} downvoteCount={data.downvote} />
                                                             </div>
-                                                            :
-                                                            <></>
-                                                        }
+                                                            {
+                                                                data.numberOfReply > 0
+                                                                ?
+                                                                <div className="content-comment-count">
+                                                                    <CommentCount count={data.numberOfReply} commentId={data.id}/>
+                                                                </div>
+                                                                :
+                                                                <></>
+                                                            }
+                                                        </div>
                                                     </li>
                                                 </div>
                                                 {/* {
@@ -246,7 +234,7 @@ const Content = ({notFound}) => {
                                 : <></>
                                 }
                             </ul>
-                            { !!comments ? 
+                            { !!comments && !!content.postId ? 
                                     <div className="refresh-comment-div"  onClick={() => refreshContent()}><div className="refresh-comment">Refresh Comment</div></div>
                                 :
                                     <></>

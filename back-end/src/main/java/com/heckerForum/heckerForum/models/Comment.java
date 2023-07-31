@@ -28,6 +28,6 @@ public class Comment {
 	private String content;
 	private Integer commentNumber;
 	private Integer numberOfReply;
-	private Long upvote;
-	private Long downvote;
+	private Long upvote = Long.valueOf(0);
+	private Long downvote = Long.valueOf(0);
 }
